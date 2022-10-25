@@ -371,6 +371,3 @@ Inductive bin : Type :=
 
 
 
-
-
-
