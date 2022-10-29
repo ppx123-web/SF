@@ -356,11 +356,27 @@ Proof.
 Qed.
 
 
-Inductive bin : Type := 
-| O : bin
-| B : bin -> bin.
+Inductive bin : Type :=
+| BO : bin
+| BD : bin -> bin
+| BS : bin -> bin
+.
 
+Fixpoint incr (b0: bin) : bin :=
+match b0 with
+| BO => BS BO
+| BD b1 => BS b1
+| BS b1 => BD (incr b1)
+end
+.
 
+Fixpoint bin_to_nat (b0: bin) : nat :=
+match b0 with
+| BO => O
+| BD b1 => 2 * (bin_to_nat b1)
+| BS b1 => 1 + 2 * (bin_to_nat b1)
+end
+.
 
 
 

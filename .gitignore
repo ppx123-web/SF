@@ -1,3 +1,8 @@
 *.pdf
 #*#
+*.vo
+*.vok
+*.vos
+*.glob
+*.aux
 tmp/
