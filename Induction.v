@@ -1,5 +1,3 @@
-Add LoadPath "tmp" as src.
-
 Require Export Basics.
 
 Theorem plus_n_O: forall n:nat, n = n + 0.
