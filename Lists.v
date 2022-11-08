@@ -345,6 +345,34 @@ Proof.
         -- rewrite IHb1. reflexivity.
 Qed.
 
+(* Theorem bag_theorem3 : forall v : nat, forall b1 b2, (member v b1) && (member v b2) = true -> subset b1 b2 = true .
+Proof.
+    intros v.
+    intros b1 b2.
+    destruct (member v b1) as [|].
+    - destruct (member v b2) as [|].
+        -- simpl. induction b1 as [|h1 t1 IHb1].
+            --- reflexivity.
+            --- assert(H1 : member v b2 = true). {
+                reflexivity.
+                }
+Qed. *)
+
+(* 
+Theorem bag_theorem3 : forall v : nat, forall b , subset b (v :: b) = true.
+Proof.
+    intros v b.
+    induction b
+
+Theorem bag_theorem3 : forall b , subset b b = true.
+Proof.
+    intros b.
+    induction b as [|h t IHb].
+    - reflexivity.
+    - simpl. rewrite <- beq_nat_refl. simpl. rewrite <- leb_refl. simpl.
+
+
+
 Theorem bag_theorem3 : forall b1 b2 : bag, subset b1 (sum b1 b2) = true.
 Proof.
     induction b1 as [|h1 t1 IHb].
@@ -371,7 +399,28 @@ Proof.
     intros b1 b2.
     induction b1 as [|h1 t1 IHb1].
     -- simpl. reflexivity.
-    -- simpl. rewrite <- beq_nat_refl. simpl. rewrite bag_theorem2. simpl.
+    -- simpl. rewrite <- beq_nat_refl. simpl. rewrite bag_theorem2. simpl. *)
 
+Theorem nil_app: forall l : natlist, [] ++ l = l.
+Proof.
+    reflexivity.
+Qed.
+
+Theorem tl_length_pred : forall l :natlist,
+pred (length l ) = length (tl l ).
+Proof.
+    intros l. destruct l as [| n l' ].
+    - reflexivity.
+    - reflexivity. 
+Qed.
+
+Theorem app_assoc : forall l1 l2 l3 : natlist,
+(l1 ++ l2 ) ++ l3 = l1 ++ (l2 ++ l3 ).
+Proof.
+intros l1 l2 l3. induction l1 as [| n l1' IHl1' ].
+- reflexivity.
+- simpl. rewrite ! IHl1'. reflexivity. Qed.
+
+    
 
 End NatList.
