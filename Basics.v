@@ -122,6 +122,13 @@ Compute (minustwo 4).
 Check S.
 Check pred.
 Check minustwo.
+(*
+These are all things that can be applied to a number to yield a number. However, there
+is a fundamental difference between the first one and the other two: functions like pred and
+minustwo come with computation rules – e.g., the definition of pred says that pred 2 can be
+simplified to 1 – while the definition of S has no such behavior attached. Although it is like
+a function in the sense that it can be applied to an argument, it does not do anything at all!
+*)
 
 Definition oddb (n:nat) : bool := negb (evenb n).
 Example test_oddb1 : oddb 1 = true.

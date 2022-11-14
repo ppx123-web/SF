@@ -695,7 +695,11 @@ Inductive baz : Type :=
     | x : baz -> baz
     | y : baz -> bool -> baz.
 
-Theorem baz_False : baz -> False. Proof. induction 1; firstorder. Qed.
+Theorem baz_False : baz -> False. 
+Proof. 
+    induction 1; 
+    firstorder. 
+Qed.
 
 Goal exists f1 : baz -> False, bijective f1.
 Proof.
