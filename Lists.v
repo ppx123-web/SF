@@ -649,8 +649,7 @@ Inductive partial_map : Type :=
 | empty : partial_map
 | record : id -> nat -> partial_map -> partial_map.
 
-Definition update (d : partial_map) (key : id) (value : nat)
-: partial_map :=
+Definition update (d : partial_map) (key : id) (value : nat) : partial_map :=
 record key value d.
 
 
