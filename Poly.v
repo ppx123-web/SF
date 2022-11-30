@@ -406,3 +406,135 @@ Proof. reflexivity. Qed.
 Example test_plus3'' : doit3times (plus 3) 0 = 9.
 Proof. reflexivity. Qed.
 
+Module Exercises.
+
+Definition fold_length {X : Type} (l : list X ) : nat :=
+fold (fun _ n => S n) l 0.
+Example test_fold_length1 : fold_length [4;7;0] = 3.
+Proof. reflexivity. Qed.
+
+Theorem fold_length_correct : forall X (l : list X ),
+fold_length l = length l.
+Proof.
+    intros X l.
+    induction l as [|h t IHl'].
+    - reflexivity.
+    - simpl. rewrite <- IHl'. reflexivity.
+Qed.
+
+Definition fold_map {X Y :Type} (f : X -> Y ) (l : list X ) : list Y := fold (fun x l' => f x :: l') l [].
+
+Example test_fold_map1 : fold_map (fun x => x + 1) [4;7;0] = [5;8;1].
+Proof. reflexivity. Qed.
+
+
+Theorem fold_map_correct : forall X Y (l : list X ) (f : X -> Y),
+fold_map f l = map f l.
+Proof.
+    intros X Y l f.
+    induction l as [|h t IHl'].
+    - reflexivity.
+    - simpl. rewrite <- IHl'. simpl. reflexivity.
+Qed.
+
+Definition prod_curry {X Y Z : Type} (f : X * Y -> Z ) (x : X ) (y : Y ) : Z := f (x, y).
+
+Definition prod_uncurry {X Y Z : Type} (f : X -> Y -> Z ) (p : X * Y ) : Z := ((f (fst p)) (snd p)).
+
+Example test_map2 : map (fun x => plus 3 x ) [2;0;2] = [5;3;5].
+Proof. reflexivity. Qed.
+
+Check @prod_curry.
+Check @prod_uncurry.
+
+Theorem uncurry_curry : forall (X Y Z : Type)
+(f : X -> Y -> Z ) x y, prod_curry (prod_uncurry f ) x y = f x y.
+Proof.
+    intros X Y Z f x y.
+    reflexivity.
+Qed.
+
+Theorem curry_uncurry : forall (X Y Z : Type)
+(f : (X * Y ) -> Z ) (p : X * Y ), prod_uncurry (prod_curry f ) p = f p.
+Proof.
+    intros X Y Z f p.
+    destruct p as (x, y).
+    reflexivity.
+Qed.
+
+Theorem nth_error_informal: forall X n l, length l = n -> @nth_error X l n = None.
+Proof.
+    intros X n l.
+    intros H.
+    induction l as [|h t IHl'].
+    - reflexivity.
+    - simpl. assert(H1 : beq_nat n 0 = false). {
+        rewrite <- H. simpl. reflexivity.
+        }
+    rewrite H1. simpl.
+Admitted.
+
+Module Church.
+
+Definition nat := forall X : Type, (X -> X ) -> X -> X.
+
+Definition one : nat := fun (X : Type) (f : X -> X) (x : X) => f x.
+
+Definition two : nat := fun (X : Type) (f : X -> X) (x : X) => f (f x).
+
+Definition zero : nat := fun (X : Type) (f : X -> X) (x : X) => x.
+
+Definition three : nat := @doit3times.
+
+Definition succ (n : nat) : nat := 
+fun (X : Type) (f : X -> X) (x : X) => f(n X f x).
+
+Example succ_1 : succ zero = one.
+Proof. reflexivity. Qed.
+
+Example succ_2 : succ one = two.
+Proof. reflexivity. Qed.
+
+Example succ_3 : succ two = three.
+Proof. reflexivity. Qed.
+
+Definition plus (n m : nat) : nat := 
+fun (X : Type) (f : X -> X) (x : X) => n X f (m X f x).
+
+Example plus_1 : plus zero one = one.
+Proof. reflexivity. Qed.
+
+Example plus_2 : plus two three = plus three two.
+Proof. reflexivity. Qed.
+
+Example plus_3 :
+    plus (plus two two) three = plus one (plus three three).
+Proof. reflexivity. Qed.
+
+Definition mult (n m : nat) : nat :=
+fun (X : Type) (f : X -> X) (x : X) => n X (m X f) x.
+
+Example mult_1 : mult one one = one.
+Proof. reflexivity. Qed.
+
+Example mult_2 : mult zero (plus three three) = zero.
+Proof. reflexivity. Qed.
+
+Example mult_3 : mult two three = plus three three.
+Proof. reflexivity. Qed.
+    
+Definition exp (n m : nat) : nat :=
+fun (X : Type) (f : X -> X) (x : X) => m (X -> X) (n X)  f x.
+
+Example exp_1 : exp two two = plus two two.
+Proof. reflexivity. Qed.
+
+Example exp_2 : exp three two = plus (mult two (mult two two)) one.
+Proof. reflexivity. Qed.
+
+Example exp_3 : exp three zero = one.
+Proof. reflexivity. Qed.
+
+End Church.
+
+End Exercises.
