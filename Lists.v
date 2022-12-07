@@ -1,4 +1,4 @@
-Require Export Induction.
+From LF Require Export Induction.
 
 Module NatList.
 

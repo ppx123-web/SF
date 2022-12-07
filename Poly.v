@@ -1,4 +1,4 @@
-Require Export Lists.
+From LF Require Export Lists.
 
 Inductive boollist : Type :=
     | bool_nil : boollist
