@@ -52,8 +52,8 @@ Proof.
     - simpl. rewrite -> IHn'. reflexivity.
 Qed.
 
-Theorem evenb_S : forall n : nat,
-evenb (S n) = negb (evenb n).
+Theorem even_S : forall n : nat,
+even (S n) = negb (even n).
 Proof.
     intros n.
     induction n as [|n' IHn'].

@@ -139,7 +139,7 @@ Proof. simpl. reflexivity. Qed.
 Fixpoint oddmembers (l :natlist) : natlist :=
 match l with 
     | nil => nil
-    | h :: t => match (oddb h) with
+    | h :: t => match (odd h) with
                 | false => oddmembers t
                 | true => h :: (oddmembers t)
                 end
@@ -154,7 +154,7 @@ Proof. simpl. reflexivity. Qed.
 Fixpoint countoddmembers (l :natlist) : nat :=
 match l with 
     | nil => O
-    | h :: t => match (oddb h) with
+    | h :: t => match (odd h) with
                 | false => countoddmembers t
                 | true => S (countoddmembers t)
                 end

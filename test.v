@@ -453,12 +453,12 @@
     
     (** [] *)
     
-    (** **** Exercise: 2 stars, optional (evenb_n__oddb_Sn)  *)
+    (** **** Exercise: 2 stars, optional (even_n__odd_Sn)  *)
     
     (** Prove the following simple fact: *)
     
-    Theorem evenb_n__oddb_Sn : forall n : nat,
-      evenb n = negb (evenb (S n)).
+    Theorem even_n__odd_Sn : forall n : nat,
+      even n = negb (even (S n)).
     Proof.
       induction n as [| n'].
       Case "n = 0".
