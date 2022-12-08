@@ -230,7 +230,7 @@ Fixpoint nth_error {X : Type} (l : list X ) (n : nat)
 : option X :=
 match l with
 | [] => None
-| a :: l' => if beq_nat n O then Some a else nth_error l' (pred n)
+| a :: l' => if eqb n O then Some a else nth_error l' (pred n)
 end.
 
 Example testn_th_error1 : nth_error [4;5;6;7] 0 = Some 4.
@@ -272,7 +272,7 @@ Example test_filter1 : filter even [1;2;3;4] = [2;4].
 Proof. reflexivity. Qed.
 
 Definition length_is_1 {X : Type} (l : list X ) : bool :=
-beq_nat (length l) 1.
+eqb (length l) 1.
 Example test_filter2 :
 filter length_is_1
 [ [1; 2]; [3]; [4]; [5;6;7]; []; [8] ]
@@ -294,7 +294,7 @@ doit3times (fun n => n * n) 2 = 256.
 Proof. reflexivity. Qed.
 
 Definition filter_even_gt7 (l : list nat) : list nat :=
-filter (fun x => if (blt_nat 7 x) && (even x) then true else false) l.
+filter (fun x => if (ltb 7 x) && (even x) then true else false) l.
 
 Example test_filter_even_gt7_1 :
 filter_even_gt7 [1;2;6;9;10;3;12;8] = [10;12;8].
@@ -468,7 +468,7 @@ Proof.
     intros H.
     induction l as [|h t IHl'].
     - reflexivity.
-    - simpl. assert(H1 : beq_nat n 0 = false). {
+    - simpl. assert(H1 : eqb n 0 = false). {
         rewrite <- H. simpl. reflexivity.
         }
     rewrite H1. simpl.

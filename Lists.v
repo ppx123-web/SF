@@ -203,7 +203,7 @@ Definition bag := natlist.
 Fixpoint count (v :nat) (s:bag) : nat :=
 match s with 
     | nil => O
-    | h :: t => match beq_nat v h with
+    | h :: t => match eqb v h with
                 | true => S (count v t)
                 | false => count v t
                 end
@@ -233,7 +233,7 @@ Example test_add2 : count 5 (add 1 [1;4;1]) = 0.
 Proof. simpl. reflexivity. Qed.
 
 Definition member (v :nat) (s:bag) : bool :=
-blt_nat 0 (count v s).
+ltb 0 (count v s).
 
 Example test_member1 : member 1 [1;4;1] = true.
 Proof. simpl. reflexivity. Qed.
@@ -245,7 +245,7 @@ Proof. simpl. reflexivity. Qed.
 Fixpoint remove_one (v :nat) (s:bag) : bag :=
 match s with
     | nil => nil
-    | h :: t => match beq_nat h v with 
+    | h :: t => match eqb h v with 
                 | true => t
                 | false => h :: remove_one v t
                 end
@@ -271,7 +271,7 @@ Proof. simpl. reflexivity. Qed.
 Fixpoint remove_all (v :nat) (s:bag) : bag :=
     match s with
     | nil => nil
-    | h :: t => match beq_nat h v with 
+    | h :: t => match eqb h v with 
                 | true => remove_all v t
                 | false => h :: remove_all v t
                 end
@@ -326,13 +326,13 @@ Proof.
     intros v1 v2 b.
     induction b as [|h t IHb'].
     - reflexivity.
-    - simpl. destruct (beq_nat v1 h) as [|].
-        -- destruct (beq_nat v1 v2) as [|].
+    - simpl. destruct (eqb v1 h) as [|].
+        -- destruct (eqb v1 v2) as [|].
             --- simpl. rewrite -> leb_n_Sn. reflexivity.
-            --- simpl. rewrite <- leb_refl. reflexivity.
-        -- destruct (beq_nat v1 v2) as [|].
+            --- simpl. rewrite leb_refl. reflexivity.
+        -- destruct (eqb v1 v2) as [|].
             --- simpl. rewrite -> leb_n_Sn. reflexivity.
-            --- simpl. rewrite <- leb_refl. reflexivity.
+            --- simpl. rewrite leb_refl. reflexivity.
 Qed.
 
 Theorem bag_theorem2 : forall v : nat, forall b1 b2 : bag, leb (count v b1) (count v (sum b1 b2)) = true. 
@@ -340,7 +340,7 @@ Proof.
     intros v b1 b2.
     induction b1 as [|h1 b1 IHb1].
     - simpl. reflexivity.
-    - simpl. destruct (beq_nat v h1) as [|].
+    - simpl. destruct (eqb v h1) as [|].
         -- simpl. rewrite IHb1. reflexivity.
         -- rewrite IHb1. reflexivity.
 Qed.
@@ -369,7 +369,7 @@ Proof.
     intros b.
     induction b as [|h t IHb].
     - reflexivity.
-    - simpl. rewrite <- beq_nat_refl. simpl. rewrite <- leb_refl. simpl.
+    - simpl. rewrite <- eqb_refl. simpl. rewrite <- leb_refl. simpl.
 
 
 
@@ -377,12 +377,12 @@ Theorem bag_theorem3 : forall b1 b2 : bag, subset b1 (sum b1 b2) = true.
 Proof.
     induction b1 as [|h1 t1 IHb].
     - simpl. reflexivity.
-    - simpl. rewrite <- beq_nat_refl. simpl. intros b2. rewrite bag_theorem2.
+    - simpl. rewrite <- eqb_refl. simpl. intros b2. rewrite bag_theorem2.
         assert(H1 : leb (count h1 t1) (count h1 (sum t1 b2)) = true). { 
             rewrite bag_theorem2. reflexivity
         }
         
-        rewrite -> bag_theorem2.  destruct (beq_nat h1 v) as [|].
+        rewrite -> bag_theorem2.  destruct (eqb h1 v) as [|].
         -- simpl. rewrite leb_n_Sn.
 
 
@@ -391,7 +391,7 @@ Proof.
     intros v b1 b2.
     induction b2 as [|h2 t2 IHb2].
     - rewrite bag_sum_nil. rewrite reflexivity.
-    - simpl. rewrite <- beq_nat_refl. simpl. destruct (beq_nat h1 v) as [|].
+    - simpl. rewrite <- eqb_refl. simpl. destruct (eqb h1 v) as [|].
         -- rewrite -> bag_theorem2. rewrite <- leb_n_Sn.
 
 Theorem bag_theorem : forall b1 b2 : bag, subset b1 (sum b1 b2) = true.
@@ -399,7 +399,7 @@ Proof.
     intros b1 b2.
     induction b1 as [|h1 t1 IHb1].
     -- simpl. reflexivity.
-    -- simpl. rewrite <- beq_nat_refl. simpl. rewrite bag_theorem2. simpl. *)
+    -- simpl. rewrite <- eqb_refl. simpl. rewrite bag_theorem2. simpl. *)
 
 Theorem nil_app: forall l : natlist, [] ++ l = l.
 Proof.
@@ -451,7 +451,7 @@ Proof.
     intros l.
     induction l as [|n l' IHl'].
     - reflexivity.
-    - simpl. rewrite -> app_length. rewrite -> plus_comm. rewrite -> IHl'. reflexivity.
+    - simpl. rewrite -> app_length. rewrite -> add_comm. rewrite -> IHl'. reflexivity.
 Qed.
 
 Theorem app_nil_r : forall l : natlist,
@@ -502,7 +502,7 @@ Proof.
 Qed.
 
 
-Fixpoint beq_natlist (l1 l2 : natlist) : bool :=
+Fixpoint eqblist (l1 l2 : natlist) : bool :=
 match l1 with
 | nil => match l2 with 
             | nil => true
@@ -510,32 +510,32 @@ match l1 with
         end
 | n1::l1' => match l2 with 
             | nil => false
-            | n2::l2' => match beq_nat n1 n2 with
-                    | true => beq_natlist l1' l2'
+            | n2::l2' => match eqb n1 n2 with
+                    | true => eqblist l1' l2'
                     | false => false
                     end
             end
 end.
 
-Example test_beq_natlist1 :
-(beq_natlist nil nil = true).
+Example test_eqblist1 :
+(eqblist nil nil = true).
 Proof. reflexivity. Qed.
 
-Example test_beq_natlist2 :
-beq_natlist [1;2;3] [1;2;3] = true.
+Example test_eqblist2 :
+eqblist [1;2;3] [1;2;3] = true.
 Proof. reflexivity. Qed.
 
-Example test_beq_natlist3 :
-beq_natlist [1;2;3] [1;2;4] = false.
+Example test_eqblist3 :
+eqblist [1;2;3] [1;2;4] = false.
 Proof. reflexivity. Qed.
 
-Theorem beq_natlist_refl : forall l :natlist,
-true = beq_natlist l l.
+Theorem eqblist_refl : forall l :natlist,
+true = eqblist l l.
 Proof.
     intros l.
     induction l as [|n l' IHl'].
     - reflexivity.
-    - simpl. rewrite <- beq_nat_refl. rewrite IHl'. reflexivity.
+    - simpl. rewrite eqb_refl. rewrite IHl'. reflexivity.
 Qed.
 
 
@@ -584,7 +584,7 @@ Inductive natoption : Type :=
 Fixpoint nth_error (l :natlist) (n:nat) : natoption :=
 match l with
 | nil => None
-| a :: l' => match beq_nat n O with
+| a :: l' => match eqb n O with
         | true => Some a
         | false => nth_error l' (pred n)
         end
@@ -630,14 +630,14 @@ Inductive id : Type :=
 
 Definition beq_id x1 x2 :=
 match x1, x2 with
-| Id n1, Id n2 => beq_nat n1 n2
+| Id n1, Id n2 => eqb n1 n2
 end.
 
 Theorem beq_id_refl : forall x, true = beq_id x x.
 Proof.
     intros x.
     destruct x as [].
-    simpl. rewrite <- beq_nat_refl. reflexivity.
+    simpl. rewrite eqb_refl. reflexivity.
 Qed.
 
 End NatList.
@@ -697,7 +697,7 @@ Inductive baz : Type :=
 Theorem baz_False : baz -> False. 
 Proof. 
     induction 1; 
-    firstorder. 
+    firstorder.
 Qed.
 
 Goal exists f1 : baz -> False, bijective f1.

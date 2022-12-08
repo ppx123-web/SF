@@ -255,7 +255,7 @@
         simpl. rewrite -> IHn'. reflexivity.
     Qed.
     
-    Theorem plus_comm : forall n m : nat,
+    Theorem add_comm : forall n m : nat,
       n + m = m + n.
     Proof.
       induction n as [| n'].
@@ -274,7 +274,7 @@
         reflexivity.
     Qed.
     
-    Theorem plus_assoc : forall n m p : nat,
+    Theorem add_assoc : forall n m p : nat,
       n + (m + p) = (n + m) + p.
     Proof.
       induction n as [| n'].
@@ -373,10 +373,10 @@
         + (p + q) = (m + n) + (p + q)]. The only difference between the
         two sides of the [=] is that the arguments [m] and [n] to the
         first inner [+] are swapped, so it seems we should be able to
-        use the commutativity of addition ([plus_comm]) to rewrite one
+        use the commutativity of addition ([add_comm]) to rewrite one
         into the other.  However, the [rewrite] tactic is a little stupid
         about _where_ it applies the rewrite.  There are three uses of
-        [+] here, and it turns out that doing [rewrite -> plus_comm]
+        [+] here, and it turns out that doing [rewrite -> add_comm]
         will affect only the _outer_ one. *)
     
     Theorem plus_rearrange_firsttry : forall n m p q : nat,
@@ -384,15 +384,15 @@
     Proof.
       intros n m p q.
       (* We just need to swap (n + m) for (m + n)...
-         it seems like plus_comm should do the trick! *)
-      rewrite -> plus_comm.
+         it seems like add_comm should do the trick! *)
+      rewrite -> add_comm.
       (* Doesn't work...Coq rewrote the wrong plus! *)
     Abort.
     
-    (** To get [plus_comm] to apply at the point where we want it, we can
+    (** To get [add_comm] to apply at the point where we want it, we can
         introduce a local lemma stating that [n + m = m + n] (for
         the particular [m] and [n] that we are talking about here), prove
-        this lemma using [plus_comm], and then use this lemma to do the
+        this lemma using [add_comm], and then use this lemma to do the
         desired rewrite. *)
     
     Theorem plus_rearrange : forall n m p q : nat,
@@ -401,7 +401,7 @@
       intros n m p q.
       assert (H: n + m = m + n).
         Case "Proof of assertion".
-        rewrite -> plus_comm. reflexivity.
+        rewrite -> add_comm. reflexivity.
       rewrite -> H. reflexivity.  Qed.
     
     (** **** Exercise: 4 stars (mult_comm)  *)
@@ -412,12 +412,12 @@
       n + (m + p) = m + (n + p).
     Proof.
       intros n m p.
-      rewrite plus_assoc.
+      rewrite add_assoc.
       assert (n + m  = m + n).
         Case "Proof of assertion".
-        rewrite -> plus_comm. reflexivity.
+        rewrite -> add_comm. reflexivity.
       rewrite H.
-      rewrite plus_assoc.
+      rewrite add_assoc.
       reflexivity.
     Qed.
       
@@ -495,7 +495,7 @@
     Qed.
     
     Theorem zero_nbeq_S : forall n:nat,
-      beq_nat 0 (S n) = false.
+      eqb 0 (S n) = false.
     Proof.
       intros n.
       reflexivity.
@@ -526,7 +526,7 @@
     Qed.
     
     Theorem S_nbeq_0 : forall n:nat,
-      beq_nat (S n) 0 = false.
+      eqb (S n) 0 = false.
     Proof.
       intros n.
       reflexivity.
@@ -535,7 +535,7 @@
     Theorem mult_1_l : forall n:nat, 1 * n = n.
     Proof.
       intros n.
-      simpl. rewrite plus_comm.
+      simpl. rewrite add_comm.
       reflexivity.
     Qed.
     
@@ -569,7 +569,7 @@
         intros m p.
         simpl.
         rewrite IHn'.
-        rewrite plus_assoc.
+        rewrite add_assoc.
         reflexivity.
     Qed.
     
@@ -588,15 +588,15 @@
       
     (** [] *)
     
-    (** **** Exercise: 2 stars, optional (beq_nat_refl)  *)
+    (** **** Exercise: 2 stars, optional (eqb_refl)  *)
     (** Prove the following theorem.  Putting [true] on the left-hand side
     of the equality may seem odd, but this is how the theorem is stated in
     the standard library, so we follow suit.  Since rewriting 
     works equally well in either direction, we will have no 
     problem using the theorem no matter which way we state it. *)
     
-    Theorem beq_nat_refl : forall n : nat, 
-      true = beq_nat n n.
+    Theorem eqb_refl : forall n : nat, 
+      true = eqb n n.
     Proof.
       induction n as [| n'].
       Case "n = 0".
@@ -625,11 +625,11 @@
       n + (m + p) = m + (n + p).
     Proof.
       intros n m p.
-      rewrite plus_assoc.
+      rewrite add_assoc.
       replace (n + m) with (m + n).
-      rewrite plus_assoc.
+      rewrite add_assoc.
       reflexivity.
-      rewrite plus_comm.
+      rewrite add_comm.
       reflexivity.
     Qed.
     
@@ -846,7 +846,7 @@
     
     (** For example, here is a proof that addition is associative: *)
     
-    Theorem plus_assoc' : forall n m p : nat,
+    Theorem add_assoc' : forall n m p : nat,
       n + (m + p) = (n + m) + p.
     Proof. intros n m p. induction n as [| n']. reflexivity. 
       simpl. rewrite -> IHn'. reflexivity.  Qed.
@@ -889,7 +889,7 @@
     (** Here is a formal proof that shows the structure more
         clearly: *)
     
-    Theorem plus_assoc'' : forall n m p : nat,
+    Theorem add_assoc'' : forall n m p : nat,
       n + (m + p) = (n + m) + p.
     Proof.
       intros n m p. induction n as [| n']. 
@@ -898,8 +898,8 @@
       Case "n = S n'".
         simpl. rewrite -> IHn'. reflexivity.   Qed.
     
-    (** **** Exercise: 2 stars, advanced (plus_comm_informal)  *)
-    (** Translate your solution for [plus_comm] into an informal proof. *)
+    (** **** Exercise: 2 stars, advanced (add_comm_informal)  *)
+    (** Translate your solution for [add_comm] into an informal proof. *)
     
     (** Theorem: Addition is commutative.
      
@@ -908,12 +908,12 @@
     *)
     (** [] *)
     
-    (** **** Exercise: 2 stars, optional (beq_nat_refl_informal)  *)
+    (** **** Exercise: 2 stars, optional (eqb_refl_informal)  *)
     (** Write an informal proof of the following theorem, using the
-        informal proof of [plus_assoc] as a model.  Don't just
+        informal proof of [add_assoc] as a model.  Don't just
         paraphrase the Coq tactics into English!
      
-        Theorem: [true = beq_nat n n] for any [n].
+        Theorem: [true = eqb n n] for any [n].
         
         Proof: (* FILL IN HERE *) 
         SKIPPED
