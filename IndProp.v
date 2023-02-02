@@ -2306,6 +2306,9 @@ Qed.
     [nostutter]. *)
 
 Inductive nostutter {X:Type} : list X -> Prop :=
+| nostutterEmpty : nostutter []
+| nostutterOne (x : X): nostutter [x]
+| nostutterApp (x y : X)(l: list X): x <> y -> nostutter (y :: l) -> nostutter (x :: y :: l)
  (* FILL IN HERE *)
 .
 (** Make sure each of these tests succeeds, but feel free to change
@@ -2319,27 +2322,45 @@ Inductive nostutter {X:Type} : list X -> Prop :=
     example with more basic tactics.)  *)
 
 Example test_nostutter_1: nostutter [3;1;4;1;5;6].
-(* FILL IN HERE *) Admitted.
+Proof.
+  apply nostutterApp. discriminate.
+  apply nostutterApp. discriminate.
+  apply nostutterApp. discriminate.
+  apply nostutterApp. discriminate.
+  apply nostutterApp. discriminate.
+  apply nostutterOne.
+  Qed.
 (* 
   Proof. repeat constructor; apply eqb_neq; auto.
   Qed.
 *)
 
 Example test_nostutter_2:  nostutter (@nil nat).
-(* FILL IN HERE *) Admitted.
+Proof.
+apply nostutterEmpty.
+Qed.
 (* 
   Proof. repeat constructor; apply eqb_neq; auto.
   Qed.
 *)
 
 Example test_nostutter_3:  nostutter [5].
-(* FILL IN HERE *) Admitted.
+Proof.
+apply nostutterOne.
+Qed.
 (* 
   Proof. repeat constructor; auto. Qed.
 *)
 
 Example test_nostutter_4:      not (nostutter [3;1;1;4]).
-(* FILL IN HERE *) Admitted.
+Proof.
+  unfold not.
+  intros.
+  inversion H.
+  inversion H4.
+  destruct H7.
+  reflexivity.
+Qed.
 (* 
   Proof. intro.
   repeat match goal with
@@ -2382,7 +2403,9 @@ Definition manual_grade_for_nostutter : option (nat*string) := None.
     others.  Do this with an inductive relation, not a [Fixpoint].  *)
 
 Inductive merge {X:Type} : list X -> list X -> list X -> Prop :=
-(* FILL IN HERE *)
+| Mergenil : merge [] [] []
+| MergeL (l1 l2 l :list X) (x : X) : merge l1 l2 l -> merge (x::l1) l2 (x::l)
+| MergeR (l1 l2 l :list X) (x : X) : merge l1 l2 l -> merge l1 (x::l2) (x::l)
 .
 
 Theorem merge_filter : forall (X : Set) (test: X->bool) (l l1 l2 : list X),
@@ -2391,7 +2414,14 @@ Theorem merge_filter : forall (X : Set) (test: X->bool) (l l1 l2 : list X),
   All (fun n => test n = false) l2 ->
   filter test l = l1.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  induction H.
+  - simpl. reflexivity.
+  - simpl. simpl in H0. destruct H0. rewrite H0. apply f_equal. apply IHmerge.
+    + apply H2. + apply H1.
+  - simpl. simpl in H1. destruct H1. rewrite H1. apply IHmerge.
+    + apply H0. + apply H2.
+Qed.
 
 (* FILL IN HERE *)
 
@@ -2432,17 +2462,31 @@ Proof.
 *)
 
 Inductive pal {X:Type} : list X -> Prop :=
-(* FILL IN HERE *)
+| palEmpty : pal []
+| palsingle x: pal [x]
+| palx x l: pal l -> pal (x::l++[x])
 .
 
 Theorem pal_app_rev : forall (X:Type) (l : list X),
   pal (l ++ (rev l)).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  induction l as [|h t IHl'].
+  - simpl. apply palEmpty.
+  - simpl. assert (H1: h :: t ++ rev t ++ [h] = h :: (t ++ rev t) ++ [h]). {
+    rewrite app_assoc. reflexivity.
+  } rewrite H1. apply palx with (x:=h). apply IHl'.
+Qed.
 
 Theorem pal_rev : forall (X:Type) (l: list X) , pal l -> l = rev l.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  induction H.
+  - simpl. reflexivity.
+  - reflexivity.
+  - simpl. rewrite rev_app_distr. rewrite <- IHpal. simpl. reflexivity.
+Qed.
+  (* FILL IN HERE *)
 (** [] *)
 
 (** **** Exercise: 5 stars, standard, optional (palindrome_converse)
@@ -2454,11 +2498,35 @@ Proof.
      forall l, l = rev l -> pal l.
 *)
 
+Lemma palindrome_converse_length: forall n {X: Type} (l: list X),
+    length l <= n -> l = rev l -> pal l.
+Proof.
+  induction n as [|n' IHn'].
+  - (* n = 0 *)
+    intros X [|x l'] Hlen Hrev.
+    -- apply palEmpty.
+    -- inversion Hlen.
+  - (* n = S n' *)
+    intros X [|x l'] Hlen Hrev.
+    -- apply palEmpty.
+    -- simpl in Hrev. destruct (rev l') as [|x' revl'] eqn:Erevl'.
+        --- inversion Hrev as [El']. apply palsingle.
+        --- inversion Hrev as [[Ex El']]. apply palx. apply IHn'.
+            ---- apply Sn_le_Sm__n_le_m. apply Sn_le_Sm__n_le_m. apply le_S.
+                  replace (S (length revl')) with (length revl' + length [x']).
+                  ----- rewrite <- app_length. rewrite <- El'. apply Hlen.
+                  ----- rewrite add_comm. reflexivity.
+            ---- rewrite El' in Erevl'. rewrite rev_app_distr in Erevl'.
+                  injection Erevl' as Erevl''. symmetry. apply Erevl''.
+Qed.
+
 Theorem palindrome_converse: forall {X: Type} (l: list X),
     l = rev l -> pal l.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros X l H. apply palindrome_converse_length with (length l).
+  - apply le_n.
+  - apply H.
+Qed.
 
 (** **** Exercise: 4 stars, advanced, optional (NoDup)
 
@@ -2511,13 +2579,21 @@ Lemma in_split : forall (X:Type) (x:X) (l:list X),
   In x l ->
   exists l1 l2, l = l1 ++ x :: l2.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  induction l.
+  - simpl in H. destruct H.
+  - simpl in H. destruct H.
+    + exists []. exists l. simpl. rewrite H. reflexivity.
+    + apply IHl in H. destruct H. destruct H. rewrite H. exists (x0::x1). exists x2.
+    simpl. reflexivity.
+Qed.
 
 (** Now define a property [repeats] such that [repeats X l] asserts
     that [l] contains at least one repeated element (of type [X]).  *)
 
 Inductive repeats {X:Type} : list X -> Prop :=
-  (* FILL IN HERE *)
+| repeats_here x l : In x l -> repeats (x :: l)
+| repeats_there x l : repeats l -> repeats (x :: l)
 .
 
 (* Do not modify the following line: *)
@@ -2542,8 +2618,24 @@ Theorem pigeonhole_principle: excluded_middle ->
   repeats l1.
 Proof.
   intros EM X l1. induction l1 as [|x l1' IHl1'].
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  - intros l2 Hin12 Hlength12. inversion Hlength12.
+  - intros l2 Hin12 Hlength12. destruct (EM (In x l1')) as [Hin1| Hnotin1].
+    -- apply repeats_here. apply Hin1.
+    -- assert (Hin2 : In x l2).
+      { apply Hin12. left. reflexivity. }
+      destruct (in_split _ _ _ Hin2) as [l21 [l22 Heq2]].
+      apply repeats_there. apply IHl1' with (l21 ++ l22).
+      --- intros x' Hin1'.
+          assert (Hin2' : In x' l2).
+          { apply Hin12. right. apply Hin1'. }
+          rewrite Heq2 in Hin2'. apply In_app_iff in Hin2'. apply In_app_iff. destruct Hin2' as [Hin21'|Hin22'].
+          ---- left. apply Hin21'.
+          ---- destruct Hin22' as [contra|Hin22'].
+                ----- rewrite contra in Hnotin1. destruct (Hnotin1 Hin1').
+                ----- right. apply Hin22'.
+      --- rewrite Heq2 in Hlength12. rewrite app_length in Hlength12.
+          rewrite app_length. apply Sn_le_Sm__n_le_m. rewrite plus_n_Sm. apply Hlength12.
+Qed.
 
 (* ================================================================= *)
 (** ** Extended Exercise: A Verified Regular-Expression Matcher *)
@@ -2687,7 +2779,18 @@ Lemma app_ne : forall (a : ascii) s re0 re1,
   ([ ] =~ re0 /\ a :: s =~ re1) \/
   exists s0 s1, s = s0 ++ s1 /\ a :: s0 =~ re0 /\ s1 =~ re1.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  split.
+  - intros. apply app_exists in H. destruct H. destruct H. destruct H. destruct H0. destruct x as [|h t]. 
+    + simpl in H. left. split. apply H0. rewrite H. apply H1.
+    + simpl in H. right. inversion H. exists t. exists x0. split. reflexivity.
+      split. apply H0. apply H1.
+  - intros. destruct H.
+    + destruct H. apply MApp with (s1:=[]). apply H. apply H0.
+    + destruct H. destruct H. destruct H. destruct H0.
+      -- rewrite H. apply MApp with (s1:=a::x). apply H0. apply H1.
+Qed.
+  (* FILL IN HERE *)
 (** [] *)
 
 (** [s] matches [Union re0 re1] iff [s] matches [re0] or [s] matches [re1]. *)
@@ -2723,8 +2826,38 @@ Lemma star_ne : forall (a : ascii) s re,
   a :: s =~ Star re <->
   exists s0 s1, s = s0 ++ s1 /\ a :: s0 =~ re /\ s1 =~ Star re.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros a s re. split.
+  - intros Hmatch. remember (a :: s) as s'. remember (Star re) as re'.
+    induction Hmatch as [| | | | | |s0' s1' re' Hmatch0' IH0' Hmatch1' IH1'].
+    -- (* Hmatch = MEmpty *)
+      discriminate.
+    -- (* Hmatch = MChar ... *)
+      discriminate.
+    -- (* Hmatch = MApp ... *)
+      discriminate.
+    -- (* Hmatch = MUnionL ... *)
+      discriminate.
+    -- (* Hmatch = MUnionR ... *)
+      discriminate.
+    -- (* Hmatch = MStar0 ... *)
+      discriminate.
+    -- (* Hmatch = MStarApp ... *)
+      destruct s0' as [|x0 s0''].
+      --- destruct (IH1' Heqs' Heqre') as [s10 [s11 [Es1 [Hmatch10 Hmatch11]]]].
+          exists s10. exists s11. split.
+          ---- apply Es1.
+          ---- split.
+                ----- apply Hmatch10.
+                ----- apply Hmatch11.
+      --- inversion Heqre' as [Ere]. inversion Heqs' as [[Ea Es]]. exists s0''. exists s1'. split.
+          ---- reflexivity.
+          ---- rewrite <- Ere. split.
+                ----- rewrite <- Ea. apply Hmatch0'.
+                ----- apply Hmatch1'.
+  - intros [s0 [s1 [Es [Hmatch0 Hmatch1]]]]. rewrite Es. apply (MStarApp (a :: s0)).
+    -- apply Hmatch0.
+    -- apply Hmatch1.
+Qed.
 
 (** The definition of our regex matcher will include two fixpoint
     functions. The first function, given regex [re], will evaluate to a
